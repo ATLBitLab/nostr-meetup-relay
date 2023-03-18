@@ -1,0 +1,36 @@
+{
+  "name": "nostr-meetup-relay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf ./build && tsc",
+    "dev": "npx nodemon",
+    "start": "yarn build && node build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terminus-btc/nostr-meetup-relay.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/terminus-btc/nostr-meetup-relay/issues"
+  },
+  "homepage": "https://github.com/terminus-btc/nostr-meetup-relay#readme",
+  "devDependencies": {
+    "@types/async": "^3.2.18",
+    "@types/node": "^18.15.3",
+    "@types/ws": "^8.5.4",
+    "nodemon": "^2.0.21",
+    "rimraf": "^4.4.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "async": "^3.2.4",
+    "ws": "^8.13.0"
+  }
+}

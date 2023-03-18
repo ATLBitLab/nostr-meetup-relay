@@ -1,5 +1,9 @@
+import * as dotenv from 'dotenv';
+
 import { auto } from 'async';
 import startWebsocket from './server/start_websocket';
+dotenv.config();
+
 
 const main = async () => {
   return await auto({

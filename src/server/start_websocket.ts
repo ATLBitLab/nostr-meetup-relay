@@ -7,7 +7,7 @@ const startWebsocket = async () => {
   return await auto({
     start: () => {
       console.log(`Starting websocket server on port ${defaults.port}...`);
-      const wss = new WebSocketServer({ port: defaults.port });
+      const wss = new WebSocketServer({ port: Number(defaults.port) });
 
       wss.on('connection', (ws: WebSocket) => {
         console.log('Client connected');

@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "async": "npm:async@3.2.4",
+    "ws": "npm:ws"
+  },
+  "tasks": {
+    "dev": "deno run --watch --allow-net --allow-read --allow-env main.ts",
+    "start": "deno run --allow-net --allow-read --allow-env main.ts"
+  }
+}

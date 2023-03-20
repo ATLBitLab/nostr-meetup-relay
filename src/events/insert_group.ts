@@ -1,6 +1,6 @@
-import { InsertEventType, InsertGroupType } from '../types';
 import { readFile, writeFile, writeFileSync } from 'fs';
 
+import { InsertGroupType } from '../types';
 import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';

@@ -20,7 +20,7 @@ const startWebsocket = async () => {
 
         ws.on('message', async (message: string) => {
           try {
-            manageEvents({ event: message, ws });
+            await manageEvents({ event: message, ws });
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

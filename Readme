@@ -1,0 +1,10 @@
+```
+# Install deps
+yarn
+
+# Run dev server
+yarn dev
+
+# Build and run for production
+yarn start
+```

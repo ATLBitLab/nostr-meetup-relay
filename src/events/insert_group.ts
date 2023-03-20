@@ -84,7 +84,6 @@ const insertGroup = async (args: Args) => {
       'validate',
       ({}, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
-          // Ignore errors, the file maybe not be present
           if (!!err) {
             sendError({ error: 'Invalid data file to insert group', ws: args.ws });
             return cbk(new Error());

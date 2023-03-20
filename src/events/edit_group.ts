@@ -83,7 +83,6 @@ const editGroup = async (args: Args) => {
       'validate',
       ({}, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
-          // Ignore errors, the file maybe not be present
           if (!!err) {
             sendError({ error: 'Data file not present to edit group', ws: args.ws });
             return cbk(new Error());

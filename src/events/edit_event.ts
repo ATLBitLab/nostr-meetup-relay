@@ -30,44 +30,44 @@ const editEvent = async (args: Args) => {
       const event = args.event[1];
 
       if (!event.id || !isHex(event.id)) {
-        sendError({ error: 'Missing/invalid event id', ws: args.ws });
+        sendError({ error: 'Missing/invalid event id to edit event', ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.pubkey || !isHex(event.pubkey)) {
-        sendError({ error: 'Missing creator pubkey', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing creator pubkey to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.created_at || Date.parse(String(event.created_at))) {
-        sendError({ error: 'Missing/Invalid event created_at', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing/Invalid event created_at to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.kind || event.kind !== defaults.event_kinds.edit) {
-        sendError({ error: 'Missing/invalid event kind', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing/invalid event kind to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.tags || !isArray(event.tags)) {
-        sendError({ error: 'Missing event tags', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event tags to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.content) {
-        sendError({ error: 'Missing event content', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event content to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.sig) {
-        sendError({ error: 'Missing event sig', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event sig to edit event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       // Verify the signature
       try {
         if (!verifySchnorr(hexAsBuffer(event.id), hexAsBuffer(event.pubkey), hexAsBuffer(event.sig))) {
-          sendError({ error: 'Invalid event sig', id: event.id, ws: args.ws });
+          sendError({ error: 'Invalid event sig to edit event', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
       } catch (error: any) {
@@ -85,7 +85,7 @@ const editEvent = async (args: Args) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           // Ignore errors, the file maybe not be present
           if (!!err) {
-            sendError({ error: 'Data file not present', ws: args.ws });
+            sendError({ error: 'Data file not present to edit event', ws: args.ws });
             return cbk(new Error());
           }
 
@@ -93,7 +93,7 @@ const editEvent = async (args: Args) => {
             const data = JSON.parse(res);
 
             if (!data.events || !isArray(data.events)) {
-              sendError({ error: 'Invalid data file', ws: args.ws });
+              sendError({ error: 'Invalid data file to edit event', ws: args.ws });
               return cbk(new Error());
             }
 
@@ -114,21 +114,21 @@ const editEvent = async (args: Args) => {
         const data = readFile;
 
         if (!data.events.length) {
-          sendError({ error: 'No events found in database', ws: args.ws });
+          sendError({ error: 'No events found in database to edit event', ws: args.ws });
           return cbk(new Error());
         }
 
         const event = args.event[1];
 
         if (!event.tags.length || !event.tags[0].length) {
-          sendError({ error: 'Expected e tag in event', ws: args.ws });
+          sendError({ error: 'Expected e tag in event to edit event', ws: args.ws });
           return cbk(new Error());
         }
         const eTag = event.tags[0].find((t: string) => t === 'e');
         const eTagId = event.tags[0].find((t: string) => isHex(t));
 
         if (!eTag || !eTagId) {
-          sendError({ error: 'Expected e tag in event', ws: args.ws });
+          sendError({ error: 'Expected e tag in event to edit event', ws: args.ws });
           return cbk(new Error());
         }
 
@@ -136,7 +136,7 @@ const editEvent = async (args: Args) => {
         const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
 
         if (!findReferenecEvent) {
-          sendError({ error: 'Missing reference event', id: event.id, ws: args.ws });
+          sendError({ error: 'Missing reference event to edit event', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
 

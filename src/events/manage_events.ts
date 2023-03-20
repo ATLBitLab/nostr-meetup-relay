@@ -7,12 +7,19 @@ import sendError from './send_error';
 const { parse } = JSON;
 const { isArray } = Array;
 
+/** Manage events
+ * @param {string} args.event
+ * @param {WebSocket} args.ws
+ *
+ * @returns {Promise<void>}
+ */
 type Args = {
   event: string;
   ws: WebSocket;
 };
 const manageEvents = async (args: Args) => {
   return await auto({
+    // Check arguments
     validate: cbk => {
       try {
         const result = parse(args.event);
@@ -34,6 +41,7 @@ const manageEvents = async (args: Args) => {
       }
     },
 
+    // Return the parsed event
     parseEvent: [
       'validate',
       ({}, cbk) => {
@@ -41,9 +49,11 @@ const manageEvents = async (args: Args) => {
       },
     ],
 
+    // Insert the event
     insertEvent: [
       'parseEvent',
       async ({ parseEvent }) => {
+        // Exit early when the event is not an insert event
         try {
           if (parseEvent.event[0] !== defaults.publish_event_type) {
             return;

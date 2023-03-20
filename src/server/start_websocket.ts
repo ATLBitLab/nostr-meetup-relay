@@ -4,6 +4,10 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import { manageEvents } from '../events';
 
+/** Start websocket server
+ *
+ * @returns {Promise<void>}
+ */
 const startWebsocket = async () => {
   return await auto({
     start: cbk => {

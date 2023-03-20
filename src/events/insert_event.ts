@@ -13,12 +13,19 @@ const { isArray } = Array;
 const isHex = (n: string) => !!n && !(n.length % 2) && /^[0-9A-F]*$/i.test(n);
 const stringify = (n: any) => JSON.stringify(n, null, 2);
 
+/** Inserts events to a json file
+ * @param {InsertEventType} args.event
+ * @param {WebSocket} args.ws
+ *
+ * @returns {Promise<void>}
+ */
 type Args = {
   event: InsertEventType;
   ws: WebSocket;
 };
 const insertEvent = async (args: Args) => {
   return await auto({
+    // Check arguments
     validate: cbk => {
       const event = args.event[1];
 
@@ -57,6 +64,7 @@ const insertEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
+      // Verify the signature
       try {
         if (!verifySchnorr(hexAsBuffer(event.id), hexAsBuffer(event.pubkey), hexAsBuffer(event.sig))) {
           sendError({ error: 'Invalid event sig', id: event.id, ws: args.ws });
@@ -70,10 +78,12 @@ const insertEvent = async (args: Args) => {
       return cbk();
     },
 
+    // Read the data file
     readFile: [
       'validate',
       ({}, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
+          // Ignore errors, the file maybe not be present
           if (!!err) {
             writeFileSync(defaults.data_path, stringify({ events: [] }));
             return cbk(null, { data: { events: [] } });
@@ -96,6 +106,7 @@ const insertEvent = async (args: Args) => {
       },
     ],
 
+    // Find p and e tags
     findTags: [
       'readFile',
       'validate',
@@ -125,6 +136,7 @@ const insertEvent = async (args: Args) => {
           return cbk();
         }
 
+        // Check if a reference event exists for rsvp
         const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
 
         if (!findReferenecEvent) {
@@ -136,6 +148,7 @@ const insertEvent = async (args: Args) => {
       },
     ],
 
+    // Insert the event to the json file
     insertEvent: [
       'findTags',
       'readFile',
@@ -150,6 +163,7 @@ const insertEvent = async (args: Args) => {
           return cbk(new Error());
         }
 
+        // If tags exists, then its an rsvp event
         !!findTags.tags ? (event.tags = findTags.tags) : null;
         data.events.push(event);
 

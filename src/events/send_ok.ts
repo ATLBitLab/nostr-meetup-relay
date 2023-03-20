@@ -3,6 +3,13 @@ import WebSocket from 'ws';
 const { stringify } = JSON;
 const messageType = 'OK';
 
+/** Send an OK message to the client
+ * @param {string} args.message
+ * @param {string} args.id
+ * @param {WebSocket} args.ws
+ *
+ * @returns {void}
+ */
 type Args = {
   id: String;
   message: String;

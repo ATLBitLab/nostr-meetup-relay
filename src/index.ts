@@ -4,6 +4,10 @@ import { auto } from 'async';
 import { startWebsocket } from './server';
 
 dotenv.config();
+/** Main function
+ *
+ * @returns {Promise<void>}
+ */
 
 const main = async () => {
   return await auto({

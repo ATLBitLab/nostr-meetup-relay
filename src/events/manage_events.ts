@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';
+import editEvent from './edit_event';
 import insertEvent from './insert_event';
 import sendError from './send_error';
 
@@ -58,8 +59,36 @@ const manageEvents = async (args: Args) => {
           if (parseEvent.event[0] !== defaults.publish_event_type) {
             return;
           }
+          if (
+            parseEvent.event[1].kind !== defaults.event_kinds.insert ||
+            parseEvent.event[1].kind !== defaults.event_kinds.rsvp
+          ) {
+            return;
+          }
+          console.log(parseEvent.event[1].kind);
 
           await insertEvent({ event: parseEvent.event, ws: args.ws });
+          return;
+        } catch (error: any) {
+          return;
+        }
+      },
+    ],
+
+    // Edit an event
+    editEvent: [
+      'parseEvent',
+      async ({ parseEvent }) => {
+        // Exit early when the event is not an edit event
+        try {
+          if (
+            parseEvent.event[0] !== defaults.publish_event_type &&
+            parseEvent.event[1].kind !== defaults.event_kinds.edit
+          ) {
+            return;
+          }
+
+          await editEvent({ event: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
           return;

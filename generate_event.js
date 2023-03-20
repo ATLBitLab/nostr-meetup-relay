@@ -6,13 +6,14 @@ const unit8AsHex = n => Buffer.from(n).toString('hex');
 const hashEvent = n => crypto.createHash('sha256').update(JSON.stringify(n)).digest();
 const pubkey = '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57';
 const createdAt = Math.round(Date.now() / 1000);
-const kind = 702;
-const tags = [
-  ['e', '759495876bcab17d55583facef1f0f74a1fc74501898e8e3d8e3ae7257216a61'],
-  ['p', '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57'],
-];
+const kind = 701;
+// const tags = [
+//   ['e', '759495876bcab17d55583facef1f0f74a1fc74501898e8e3d8e3ae7257216a61'],
+//   ['p', '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57'],
+// ];
+const tags = [['e', '759495876bcab17d55583facef1f0f74a1fc74501898e8e3d8e3ae7257216a61']];
 // const tags = [];
-const content = 'test content 34556';
+const content = 'i am editing this post';
 
 const sampleJson = {
   content,

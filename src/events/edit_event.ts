@@ -5,15 +5,14 @@ import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';
 import sendError from './send_error';
-import sendOk from './send_ok';
 import { verifySchnorr } from 'tiny-secp256k1';
 
-const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
 const { isArray } = Array;
+const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
 const isHex = (n: string) => !!n && !(n.length % 2) && /^[0-9A-F]*$/i.test(n);
 const stringify = (n: any) => JSON.stringify(n, null, 2);
 
-/** Inserts events to a json file
+/** Edit an existing event
  * @param {InsertEventType} args.event
  * @param {WebSocket} args.ws
  *
@@ -23,7 +22,7 @@ type Args = {
   event: InsertEventType;
   ws: WebSocket;
 };
-const insertEvent = async (args: Args) => {
+const editEvent = async (args: Args) => {
   return await auto({
     // Check arguments
     validate: cbk => {
@@ -44,7 +43,7 @@ const insertEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
-      if (!event.kind || (event.kind !== defaults.event_kinds.insert && event.kind !== defaults.event_kinds.rsvp)) {
+      if (!event.kind || event.kind !== defaults.event_kinds.edit) {
         sendError({ error: 'Missing/invalid event kind', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
@@ -54,8 +53,7 @@ const insertEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
-      // When inserting a new event, content cannot be empty
-      if (event.kind === defaults.event_kinds.insert && !event.content) {
+      if (!event.content) {
         sendError({ error: 'Missing event content', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
@@ -86,8 +84,8 @@ const insertEvent = async (args: Args) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           // Ignore errors, the file maybe not be present
           if (!!err) {
-            writeFileSync(defaults.data_path, stringify({ events: [] }));
-            return cbk(null, { data: { events: [] } });
+            sendError({ error: 'Data file not present', ws: args.ws });
+            return cbk(new Error());
           }
 
           try {
@@ -107,37 +105,33 @@ const insertEvent = async (args: Args) => {
       },
     ],
 
-    // Find p and e tags
-    findTags: [
+    // Modify the old event
+    modifyEvent: [
       'readFile',
       'validate',
       ({ readFile }, cbk) => {
         const data = readFile;
 
         if (!data.events.length) {
-          return cbk();
+          sendError({ error: 'No events found in database', ws: args.ws });
+          return cbk(new Error());
         }
 
         const event = args.event[1];
 
-        if (!event.tags.length || !event.tags[0].length || !event.tags[1].length) {
-          return cbk();
+        if (!event.tags.length || !event.tags[0].length) {
+          sendError({ error: 'Expected e tag in event', ws: args.ws });
+          return cbk(new Error());
         }
         const eTag = event.tags[0].find((t: string) => t === 'e');
         const eTagId = event.tags[0].find((t: string) => isHex(t));
 
         if (!eTag || !eTagId) {
-          return cbk();
+          sendError({ error: 'Expected e tag in event', ws: args.ws });
+          return cbk(new Error());
         }
 
-        const pTag = event.tags[1].find((t: string) => t === 'p');
-        const pTagId = event.tags[1].find((t: string) => isHex(t));
-
-        if (!pTag || !pTagId) {
-          return cbk();
-        }
-
-        // Check if a reference event exists for rsvp
+        // Find the reference event to modify
         const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
 
         if (!findReferenecEvent) {
@@ -145,36 +139,21 @@ const insertEvent = async (args: Args) => {
           return cbk(new Error());
         }
 
-        return cbk(null, { tags: event.tags });
-      },
-    ],
-
-    // Insert the event to the json file
-    insertEvent: [
-      'findTags',
-      'readFile',
-      ({ findTags, readFile }, cbk) => {
-        const event = args.event[1];
-        const data = readFile;
-
-        const checkDuplicate = data.events.find((e: any) => e.id === event.id);
-
-        if (!!checkDuplicate) {
-          sendError({ error: 'Duplicate event id', id: event.id, ws: args.ws });
+        // Make sure the pubkey of the new event matches the reference event
+        if (findReferenecEvent.pubkey !== event.pubkey) {
+          sendError({ error: 'Pubkey mismatch to edit event', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
 
-        // If tags exists, then its an rsvp event
-        !!findTags.tags ? (event.tags = findTags.tags) : null;
-        data.events.push(event);
+        // Edit the content of the reference event and update data variable
+        findReferenecEvent.content = event.content;
 
-        writeFile(defaults.data_path, stringify(data), err => {
+        writeFile(defaults.data_path, stringify(data), 'utf8', err => {
           if (!!err) {
             sendError({ error: err.message, id: event.id, ws: args.ws });
             return cbk(new Error());
           }
 
-          sendOk({ id: event.id, message: 'Event inserted', ws: args.ws });
           return cbk();
         });
       },
@@ -182,4 +161,4 @@ const insertEvent = async (args: Args) => {
   });
 };
 
-export default insertEvent;
+export default editEvent;

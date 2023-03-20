@@ -1,3 +1,5 @@
+To generate fake events for testing run `node generate_event.js` and copy paste the output in postman or whatever.
+
 ```
 # Install deps
 yarn

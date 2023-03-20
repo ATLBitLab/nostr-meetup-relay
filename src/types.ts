@@ -5,7 +5,7 @@ export type InsertEventType = [
     pubkey: string;
     created_at: number;
     kind: number;
-    tags: [[]];
+    tags: Array<Array<string>>;
     content: string;
     sig: string;
   }

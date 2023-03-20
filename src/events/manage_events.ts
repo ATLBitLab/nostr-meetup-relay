@@ -44,11 +44,11 @@ const manageEvents = async (args: Args) => {
     insertEvent: [
       'parseEvent',
       async ({ parseEvent }) => {
-        if (parseEvent.event[0] !== defaults.publish_event_type) {
-          return;
-        }
-
         try {
+          if (parseEvent.event[0] !== defaults.publish_event_type) {
+            return;
+          }
+
           await insertEvent({ event: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {

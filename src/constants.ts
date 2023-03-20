@@ -10,6 +10,7 @@ export const defaults = {
   port: process.env.PORT || 8080,
   event_kinds: {
     insert: 700,
+    rsvp: 702,
   },
   data_path: join(cwd(), 'meetup.json'),
   event_types: ['CLOSE', 'EVENT', 'REQ'],

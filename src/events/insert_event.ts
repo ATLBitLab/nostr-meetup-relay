@@ -1,5 +1,3 @@
-import * as tinySecp from 'tiny-secp256k1';
-
 import { readFile, writeFile, writeFileSync } from 'fs';
 
 import { InsertEventType } from '../types';
@@ -7,6 +5,8 @@ import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';
 import sendError from './send_error';
+import sendOk from './send_ok';
+import { verifySchnorr } from 'tiny-secp256k1';
 
 const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
 const { isArray } = Array;
@@ -37,8 +37,8 @@ const insertEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
-      if (!event.kind || event.kind !== defaults.event_kinds.insert) {
-        sendError({ error: 'Missing event kind', id: event.id, ws: args.ws });
+      if (!event.kind || (event.kind !== defaults.event_kinds.insert && event.kind !== defaults.event_kinds.rsvp)) {
+        sendError({ error: 'Missing/invalid event kind', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
@@ -58,7 +58,7 @@ const insertEvent = async (args: Args) => {
       }
 
       try {
-        if (!tinySecp.verifySchnorr(hexAsBuffer(event.id), hexAsBuffer(event.pubkey), hexAsBuffer(event.sig))) {
+        if (!verifySchnorr(hexAsBuffer(event.id), hexAsBuffer(event.pubkey), hexAsBuffer(event.sig))) {
           sendError({ error: 'Invalid event sig', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
@@ -82,12 +82,12 @@ const insertEvent = async (args: Args) => {
           try {
             const data = JSON.parse(res);
 
-            if (!isArray(data.events)) {
+            if (!data.events || !isArray(data.events)) {
               sendError({ error: 'Invalid data file', ws: args.ws });
               return cbk(new Error());
             }
 
-            return cbk(null, { data });
+            return cbk(null, data);
           } catch (error: any) {
             sendError({ error: error.message, ws: args.ws });
             return cbk(new Error());
@@ -96,11 +96,52 @@ const insertEvent = async (args: Args) => {
       },
     ],
 
-    writeFile: [
+    findTags: [
       'readFile',
+      'validate',
       ({ readFile }, cbk) => {
+        const data = readFile;
+
+        if (!data.events.length) {
+          return cbk();
+        }
+
         const event = args.event[1];
-        const data = readFile.data;
+
+        if (!event.tags.length || !event.tags[0].length || !event.tags[1].length) {
+          return cbk();
+        }
+        const eTag = event.tags[0].find((t: string) => t === 'e');
+        const eTagId = event.tags[0].find((t: string) => isHex(t));
+
+        if (!eTag || !eTagId) {
+          return cbk();
+        }
+
+        const pTag = event.tags[1].find((t: string) => t === 'p');
+        const pTagId = event.tags[1].find((t: string) => isHex(t));
+
+        if (!pTag || !pTagId) {
+          return cbk();
+        }
+
+        const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
+
+        if (!findReferenecEvent) {
+          sendError({ error: 'Missing reference event', id: event.id, ws: args.ws });
+          return cbk(new Error());
+        }
+
+        return cbk(null, { tags: event.tags });
+      },
+    ],
+
+    insertEvent: [
+      'findTags',
+      'readFile',
+      ({ findTags, readFile }, cbk) => {
+        const event = args.event[1];
+        const data = readFile;
 
         const checkDuplicate = data.events.find((e: any) => e.id === event.id);
 
@@ -109,6 +150,7 @@ const insertEvent = async (args: Args) => {
           return cbk(new Error());
         }
 
+        !!findTags.tags ? (event.tags = findTags.tags) : null;
         data.events.push(event);
 
         writeFile(defaults.data_path, stringify(data), err => {
@@ -117,6 +159,7 @@ const insertEvent = async (args: Args) => {
             return cbk(new Error());
           }
 
+          sendOk({ id: event.id, message: 'Event inserted', ws: args.ws });
           return cbk();
         });
       },

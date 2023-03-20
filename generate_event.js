@@ -6,13 +6,13 @@ const unit8AsHex = n => Buffer.from(n).toString('hex');
 const hashEvent = n => crypto.createHash('sha256').update(JSON.stringify(n)).digest();
 const pubkey = '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57';
 const createdAt = Math.round(Date.now() / 1000);
-const kind = 601;
+const kind = 700;
 // const tags = [
 //   ['e', '283fa620ebbd5ba3104243c88358f3f8cfe817bb95c7afcd6419c507dd592108'],
 //   ['p', '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57'],
 // ];
-const tags = [['e', '47dddc4a5478e6d0a35a23f6ccb4112c6818e3305d4503b355c3ef331febf38e']];
-// const tags = [];
+// const tags = [['e', '47dddc4a5478e6d0a35a23f6ccb4112c6818e3305d4503b355c3ef331febf38e']];
+const tags = [];
 const content = 'editing group';
 
 const sampleJson = {
@@ -22,7 +22,7 @@ const sampleJson = {
   tags,
   created_at: createdAt,
   id: '123',
-  group_id: '123',
+  group_id: '47dddc4a5478e6d0a35a23f6ccb4112c6818e3305d4503b355c3ef331febf38e',
   sig: '123',
 };
 

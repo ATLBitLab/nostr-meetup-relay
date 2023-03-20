@@ -103,6 +103,11 @@ const insertEvent = async (args: Args) => {
               return cbk(new Error());
             }
 
+            if (!data.groups || !isArray(data.groups)) {
+              sendError({ error: 'Invalid data file', ws: args.ws });
+              return cbk(new Error());
+            }
+
             return cbk(null, data);
           } catch (error: any) {
             sendError({ error: error.message, ws: args.ws });
@@ -120,6 +125,12 @@ const insertEvent = async (args: Args) => {
         const data = readFile;
 
         const checkDuplicate = data.events.find((e: any) => e.id === event.id);
+        const findGroup = data.groups.find((g: any) => g.id === event.group_id);
+
+        if (!findGroup) {
+          sendError({ error: 'Group not found', id: event.id, ws: args.ws });
+          return cbk(new Error());
+        }
 
         if (!!checkDuplicate) {
           sendError({ error: 'Duplicate event id', id: event.id, ws: args.ws });

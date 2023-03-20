@@ -3,6 +3,7 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import editEvent from './edit_event';
 import insertEvent from './insert_event';
+import insertGroup from './insert_group';
 import rsvpEvent from './rsvp_event';
 import sendError from './send_error';
 
@@ -48,6 +49,29 @@ const manageEvents = async (args: Args) => {
       'validate',
       ({}, cbk) => {
         return cbk(null, { event: parse(args.event) });
+      },
+    ],
+
+    // Insert the group
+    insertGroup: [
+      'parseEvent',
+      async ({ parseEvent }) => {
+        // Exit early when not inserting a group
+        try {
+          if (
+            parseEvent.event[0] !== defaults.publish_event_type ||
+            parseEvent.event[1].kind !== defaults.event_kinds.group_insert
+          ) {
+            return;
+          }
+
+          console.log(parseEvent.event[1].kind);
+
+          await insertGroup({ group: parseEvent.event, ws: args.ws });
+          return;
+        } catch (error: any) {
+          return;
+        }
       },
     ],
 

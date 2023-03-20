@@ -3,6 +3,7 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import editEvent from './edit_event';
 import insertEvent from './insert_event';
+import rsvpEvent from './rsvp_event';
 import sendError from './send_error';
 
 const { parse } = JSON;
@@ -56,15 +57,13 @@ const manageEvents = async (args: Args) => {
       async ({ parseEvent }) => {
         // Exit early when the event is not an insert event
         try {
-          if (parseEvent.event[0] !== defaults.publish_event_type) {
-            return;
-          }
           if (
-            parseEvent.event[1].kind !== defaults.event_kinds.insert ||
-            parseEvent.event[1].kind !== defaults.event_kinds.rsvp
+            parseEvent.event[0] !== defaults.publish_event_type ||
+            parseEvent.event[1].kind !== defaults.event_kinds.insert
           ) {
             return;
           }
+
           console.log(parseEvent.event[1].kind);
 
           await insertEvent({ event: parseEvent.event, ws: args.ws });
@@ -82,13 +81,36 @@ const manageEvents = async (args: Args) => {
         // Exit early when the event is not an edit event
         try {
           if (
-            parseEvent.event[0] !== defaults.publish_event_type &&
+            parseEvent.event[0] !== defaults.publish_event_type ||
             parseEvent.event[1].kind !== defaults.event_kinds.edit
           ) {
             return;
           }
 
+          console.log(parseEvent.event[1].kind);
+
           await editEvent({ event: parseEvent.event, ws: args.ws });
+          return;
+        } catch (error: any) {
+          return;
+        }
+      },
+    ],
+
+    // Rsvp to an event
+    rsvpEvent: [
+      'parseEvent',
+      async ({ parseEvent }) => {
+        // Exit early when the event is not an rsvp event
+        try {
+          if (
+            parseEvent.event[0] !== defaults.publish_event_type ||
+            parseEvent.event[1].kind !== defaults.event_kinds.rsvp
+          ) {
+            return;
+          }
+
+          await rsvpEvent({ event: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
           return;

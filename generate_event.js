@@ -6,14 +6,14 @@ const unit8AsHex = n => Buffer.from(n).toString('hex');
 const hashEvent = n => crypto.createHash('sha256').update(JSON.stringify(n)).digest();
 const pubkey = '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57';
 const createdAt = Math.round(Date.now() / 1000);
-const kind = 701;
-// const tags = [
-//   ['e', '759495876bcab17d55583facef1f0f74a1fc74501898e8e3d8e3ae7257216a61'],
-//   ['p', '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57'],
-// ];
-const tags = [['e', '759495876bcab17d55583facef1f0f74a1fc74501898e8e3d8e3ae7257216a61']];
+const kind = 702;
+const tags = [
+  ['e', '283fa620ebbd5ba3104243c88358f3f8cfe817bb95c7afcd6419c507dd592108'],
+  ['p', '55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57'],
+];
+// const tags = [['e', '283fa620ebbd5ba3104243c88358f3f8cfe817bb95c7afcd6419c507dd592108']];
 // const tags = [];
-const content = 'i am editing this post';
+const content = 'editing content';
 
 const sampleJson = {
   content,
@@ -22,6 +22,7 @@ const sampleJson = {
   tags,
   created_at: createdAt,
   id: '123',
+  group_id: '123',
   sig: '123',
 };
 

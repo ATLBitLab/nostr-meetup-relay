@@ -29,6 +29,11 @@ const insertEvent = async (args: Args) => {
     validate: cbk => {
       const event = args.event[1];
 
+      if (!event.group_id) {
+        sendError({ error: 'Missing group id', ws: args.ws });
+        return cbk(new Error());
+      }
+
       if (!event.id || !isHex(event.id)) {
         sendError({ error: 'Missing/invalid event id', ws: args.ws });
         return cbk(new Error());
@@ -44,7 +49,7 @@ const insertEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
-      if (!event.kind || (event.kind !== defaults.event_kinds.insert && event.kind !== defaults.event_kinds.rsvp)) {
+      if (!event.kind || event.kind !== defaults.event_kinds.insert) {
         sendError({ error: 'Missing/invalid event kind', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
@@ -55,7 +60,7 @@ const insertEvent = async (args: Args) => {
       }
 
       // When inserting a new event, content cannot be empty
-      if (event.kind === defaults.event_kinds.insert && !event.content) {
+      if (!event.content) {
         sendError({ error: 'Missing event content', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
@@ -86,8 +91,8 @@ const insertEvent = async (args: Args) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           // Ignore errors, the file maybe not be present
           if (!!err) {
-            writeFileSync(defaults.data_path, stringify({ events: [] }));
-            return cbk(null, { data: { events: [] } });
+            sendError({ error: 'Invalid data file to insert event', ws: args.ws });
+            return cbk(new Error());
           }
 
           try {
@@ -107,53 +112,10 @@ const insertEvent = async (args: Args) => {
       },
     ],
 
-    // Find p and e tags
-    findTags: [
-      'readFile',
-      'validate',
-      ({ readFile }, cbk) => {
-        const data = readFile;
-
-        if (!data.events.length) {
-          return cbk();
-        }
-
-        const event = args.event[1];
-
-        if (!event.tags.length || !event.tags[0].length || !event.tags[1].length) {
-          return cbk();
-        }
-        const eTag = event.tags[0].find((t: string) => t === 'e');
-        const eTagId = event.tags[0].find((t: string) => isHex(t));
-
-        if (!eTag || !eTagId) {
-          return cbk();
-        }
-
-        const pTag = event.tags[1].find((t: string) => t === 'p');
-        const pTagId = event.tags[1].find((t: string) => isHex(t));
-
-        if (!pTag || !pTagId) {
-          return cbk();
-        }
-
-        // Check if a reference event exists for rsvp
-        const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
-
-        if (!findReferenecEvent) {
-          sendError({ error: 'Missing reference event', id: event.id, ws: args.ws });
-          return cbk(new Error());
-        }
-
-        return cbk(null, { tags: event.tags });
-      },
-    ],
-
     // Insert the event to the json file
     insertEvent: [
-      'findTags',
       'readFile',
-      ({ findTags, readFile }, cbk) => {
+      ({ readFile }, cbk) => {
         const event = args.event[1];
         const data = readFile;
 
@@ -164,8 +126,6 @@ const insertEvent = async (args: Args) => {
           return cbk(new Error());
         }
 
-        // If tags exists, then its an rsvp event
-        !!findTags.tags ? (event.tags = findTags.tags) : null;
         data.events.push(event);
 
         writeFile(defaults.data_path, stringify(data), err => {

@@ -71,8 +71,6 @@ const manageEvents = async (args: Args) => {
             return;
           }
 
-          console.log(parseEvent.event[1].kind);
-
           await insertGroup({ group: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
@@ -93,8 +91,6 @@ const manageEvents = async (args: Args) => {
           ) {
             return;
           }
-
-          console.log(parseEvent.event[1].kind);
 
           await editGroup({ group: parseEvent.event, ws: args.ws });
           return;
@@ -117,8 +113,6 @@ const manageEvents = async (args: Args) => {
             return;
           }
 
-          console.log(parseEvent.event[1].kind);
-
           await insertEvent({ event: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
@@ -139,8 +133,6 @@ const manageEvents = async (args: Args) => {
           ) {
             return;
           }
-
-          console.log(parseEvent.event[1].kind);
 
           await editEvent({ event: parseEvent.event, ws: args.ws });
           return;

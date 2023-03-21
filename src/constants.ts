@@ -15,7 +15,7 @@ export const defaults = {
     rsvp: 702,
   },
   data_path: join(cwd(), 'meetup.json'),
-  event_types: ['CLOSE', 'EVENT', 'REQ'],
+  message_types: ['CLOSE', 'EVENT', 'REQ'],
   publish_event_type: 'EVENT',
   close_event_type: 'CLOSE',
   req_event_type: 'REQ',

@@ -32,7 +32,7 @@ const manageEvents = async (args: Args) => {
           return cbk(new Error());
         }
 
-        if (!defaults.event_types.includes(result[0])) {
+        if (!defaults.message_types.includes(result[0])) {
           sendError({ error: 'Invalid event type', ws: args.ws });
           return cbk(new Error());
         }
@@ -47,7 +47,7 @@ const manageEvents = async (args: Args) => {
     // Return the parsed event
     parseEvent: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         return cbk(null, { event: parse(args.event) });
       },
     ],

@@ -1,2 +1,3 @@
 import manageEvents from './manage_events';
-export { manageEvents };
+import manageRequests from './manage_requests';
+export { manageEvents, manageRequests };

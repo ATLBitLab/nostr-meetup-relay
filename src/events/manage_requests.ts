@@ -1,5 +1,4 @@
 import WebSocket from 'ws';
-import { readFile, writeFile, writeFileSync } from 'fs';
 import { auto } from 'async';
 import { defaults } from '../constants';
 import filterEvents from './filter_events';

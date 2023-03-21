@@ -54,12 +54,16 @@
   "REQ",
   "01P5BzG7tf29DG3rJaTZKqwBam0q0KygHrYC4g6vBm22ZOU8k0DTvIgtb9NABULx",
   {
+    // event id
     ids: ["aca7b677c0b4a7f459fc94b809bea71f7a800a2b54f5c1c92d92ffa0d7b18a9f"],
+    // evennt pubkey
     authors: [
       "55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57"
     ],
     kinds: [600],
+    // event ids in e tag
     "#e": ["283fa620ebbd5ba3104243c88358f3f8cfe817bb95c7afcd6419c507dd592108"],
+    // pubkeys in p tag
     "#p": ["55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57"],
     since: 1679343740,
     until: 1679350000,

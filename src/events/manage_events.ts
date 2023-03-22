@@ -53,7 +53,7 @@ const manageEvents = async (args: Args) => {
     // Return the parsed event
     parseEvent: [
       'validate',
-      ({ }, cbk) => {
+      ({}, cbk) => {
         return cbk(null, { event: parse(args.event) });
       },
     ],

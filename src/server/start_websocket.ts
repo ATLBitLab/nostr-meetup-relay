@@ -1,8 +1,8 @@
 import WebSocket, { WebSocketServer } from 'ws';
+import { manageEvents, manageRequests } from '../events';
 
 import { auto } from 'async';
 import { defaults } from '../constants';
-import { manageEvents, manageRequests } from '../events';
 
 const { parse } = JSON;
 const subs = new Map();
@@ -22,7 +22,10 @@ const startWebsocket = async () => {
         console.log('Client connected');
         ws.on('message', async (message: string) => {
           try {
-            parse(message)[0] === 'EVENT' ? manageEvents({ event: message, ws }) : manageRequests({ req: message, ws, subs })
+            console.log(parse(message)[0]);
+            parse(message)[0] === 'EVENT'
+              ? manageEvents({ event: message, ws })
+              : manageRequests({ req: message, ws, subs });
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

@@ -7,9 +7,7 @@ import insertEvent from './insert_event';
 import insertGroup from './insert_group';
 import rsvpEvent from './rsvp_event';
 import sendError from './send_error';
-
-const { parse } = JSON;
-const { isArray } = Array;
+import { isArray, parse } from '../utils'
 
 /** Manage events
  * @param {string} args.event
@@ -53,7 +51,7 @@ const manageEvents = async (args: Args) => {
     // Return the parsed event
     parseEvent: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         return cbk(null, { event: parse(args.event) });
       },
     ],

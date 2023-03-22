@@ -8,7 +8,7 @@ import { startWebsocket } from './server';
 
 dotenv.config();
 
-const stringify = (n: any) => JSON.stringify(n, null, 2);
+import { stringify } from './utils'
 
 /** Main function
  *
@@ -16,34 +16,34 @@ const stringify = (n: any) => JSON.stringify(n, null, 2);
  */
 
 const main = async () => {
-  return await auto({
-    // Insert db file on start
-    insertDbFile: cbk => {
-      const isExists = existsSync(defaults.data_path);
+    return await auto({
+        // Insert db file on start
+        insertDbFile: cbk => {
+            const isExists = existsSync(defaults.data_path);
 
-      if (!!isExists) {
-        return cbk();
-      }
+            if (!!isExists) {
+                return cbk();
+            }
 
-      // If the db file doesn't exist, create it and insert default data.
-      if (!isExists) {
-        writeFile(defaults.data_path, stringify(defaults.default_data), err => {
-          if (!!err) {
-            return cbk(err);
-          }
+            // If the db file doesn't exist, create it and insert default data.
+            if (!isExists) {
+                writeFile(defaults.data_path, stringify(defaults.default_data), err => {
+                    if (!!err) {
+                        return cbk(err);
+                    }
 
-          return cbk();
-        });
-      }
-    },
-    // Start the server
-    startServer: [
-      'insertDbFile',
-      async () => {
-        startWebsocket();
-      },
-    ],
-  });
+                    return cbk();
+                });
+            }
+        },
+        // Start the server
+        startServer: [
+            'insertDbFile',
+            async () => {
+                startWebsocket();
+            },
+        ],
+    });
 };
 
 // This is the entry point of the program

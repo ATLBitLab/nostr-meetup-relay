@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 
-const { stringify } = JSON;
+import { stringify } from '../utils'
 const messageType = 'OK';
 
 /** Send an error message to the client

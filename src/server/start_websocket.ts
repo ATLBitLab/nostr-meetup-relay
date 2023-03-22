@@ -4,9 +4,9 @@ import { manageEvents, manageRequests } from '../events';
 import { auto } from 'async';
 import { defaults } from '../constants';
 
-const { parse } = JSON;
-const subs = new Map();
+import { parse } from '../utils'
 
+const subs = new Map();
 /** Start websocket server
  *
  * @returns {Promise<void>}

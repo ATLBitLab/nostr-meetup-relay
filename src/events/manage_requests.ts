@@ -4,9 +4,7 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import filterEvents from './filter_events';
 import sendError from './send_error';
-
-const { parse } = JSON;
-const { isArray } = Array;
+import { isArray, parse } from '../utils'
 
 /** Manage events
  * @param {string} args.req
@@ -54,7 +52,7 @@ const manageRequests = async (args: Args) => {
     // Return the parsed req
     parseReq: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         return cbk(null, { req: parse(args.req) });
       },
     ],

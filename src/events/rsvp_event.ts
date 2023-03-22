@@ -8,10 +8,7 @@ import sendError from './send_error';
 import sendOk from './send_ok';
 import { verifySchnorr } from 'tiny-secp256k1';
 
-const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
-const { isArray } = Array;
-const isHex = (n: string) => !!n && !(n.length % 2) && /^[0-9A-F]*$/i.test(n);
-const stringify = (n: any) => JSON.stringify(n, null, 2);
+import { hexAsBuffer, isHex, isNumber, stringify, isArray } from '../utils'
 
 /** Rsvp to an event
  * @param {InsertEventType} args.event
@@ -39,7 +36,7 @@ const rsvpEvent = async (args: Args) => {
         return cbk(new Error());
       }
 
-      if (!event.created_at || Date.parse(String(event.created_at))) {
+      if (!event.created_at || !isNumber(event.created_at)) {
         sendError({ error: 'Missing/Invalid event created_at to rsvp event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
@@ -76,7 +73,7 @@ const rsvpEvent = async (args: Args) => {
     // Read the data file
     readFile: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           if (!!err) {
             sendError({ error: err.message, ws: args.ws });

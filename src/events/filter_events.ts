@@ -5,12 +5,7 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import sendError from './send_error';
 import { ReqType } from '../types';
-
-const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
-const { isArray } = Array;
-const isHex = (n: string) => !!n && !(n.length % 2) && /^[0-9A-F]*$/i.test(n);
-const isNumber = (n: any) => typeof n === 'number';
-const stringify = (n: any) => JSON.stringify(n, null, 2);
+import { isHex, isNumber, isArray } from '../utils'
 
 /** Inserts events to a json file
  * @param {InsertEventType} args.event
@@ -64,32 +59,17 @@ const filterEvents = async (args: Args) => {
                 return cbk(new Error());
             }
 
-            if (reqFilters.since &&
-                (
-                    isNaN(Date.parse(String(reqFilters.since))) ||
-                    typeof reqFilters.since !== 'number'
-                )
-            ) {
+            if (reqFilters.since && !isNumber(reqFilters.since)) {
                 sendError({ error: 'Invalid req since to filter events', id: subscriptionId, ws: args.ws });
                 return cbk(new Error());
             }
 
-            if (reqFilters.until &&
-                (
-                    isNaN(Date.parse(String(reqFilters.until))) ||
-                    typeof reqFilters.until !== 'number'
-                )
-            ) {
+            if (reqFilters.until && !isNumber(reqFilters.until)) {
                 sendError({ error: 'Invalid req until to filter events', id: subscriptionId, ws: args.ws });
                 return cbk(new Error());
             }
 
-            if (reqFilters.limit &&
-                (
-                    isNaN(Date.parse(String(reqFilters.limit))) ||
-                    typeof reqFilters.limit !== 'number'
-                )
-            ) {
+            if (reqFilters.limit && !isNumber(reqFilters.limit)) {
                 sendError({ error: 'Invalid req limit to filter events', id: subscriptionId, ws: args.ws });
                 return cbk(new Error());
             }
@@ -166,17 +146,20 @@ const filterEvents = async (args: Args) => {
                     return cbk(new Error());
                 }
 
-                if (since || !isNumber(since)) {
+                console.log('since', since)
+                console.log('!isNumber(since)', !isNumber(since))
+                console.log('isNumber(since)', isNumber(since))
+                if (!isNumber(since)) {
                     sendError({ error: 'Missing/Invalid req "since", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
-                if (until || !isNumber(until)) {
+                if (!isNumber(until)) {
                     sendError({ error: 'Missing/Invalid req "until", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
-                if (limit && !isNumber(limit)) {
+                if (!isNumber(limit)) {
                     sendError({ error: 'Missing/Invalid req "limit", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }

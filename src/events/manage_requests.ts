@@ -25,6 +25,7 @@ const manageRequests = async (args: Args) => {
         validate: cbk => {
             try {
                 const result = parse(args.req);
+                console.log(args)
 
                 if (!isArray(result) || result.length < 3) {
                     sendError({ error: 'Invalid req', ws: args.ws });
@@ -44,11 +45,12 @@ const manageRequests = async (args: Args) => {
                     const sub = new Subscription(JSON.stringify(result), 0);
                     args.subs.set(subscriptionId, sub);
                 }
+                console.log(args)
 
                 return cbk();
             } catch (error: any) {
                 sendError({ error: error.message, ws: args.ws });
-                return cbk(new Error());
+                return cbk(new Error(error.message));
             }
         },
 
@@ -75,7 +77,7 @@ const manageRequests = async (args: Args) => {
                     }
                     console.log('subscriptionId', parseReq.req[1]);
                     console.log('filters', parseReq.req[2]);
-                    await filterEvents(parseReq.req);
+                    await filterEvents({ req: parseReq.req, ws: args.ws });
                     return;
                 } catch (error: any) {
                     return;

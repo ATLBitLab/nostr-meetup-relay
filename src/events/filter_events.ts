@@ -131,10 +131,10 @@ const filterEvents = async (args: Args) => {
             'validate',
             ({ readFile }, cbk) => {
                 const data = readFile;
-                const req = args.req[2]
+                const filters = args.req[2]
                 const subId = args.req[1]
-                const { ids, authors, kinds, since, until, limit } = { ...req };
-                const e = args.req[2]['#e'], p = args.req[2]['#p'];
+                const { ids, authors, kinds, since, until, limit } = { ...filters };
+                const e = filters['#e'], p = filters['#p'];
 
                 if (!data.events.length || !data.groups.length) {
                     sendError({ error: 'No data in database to filter', id: subId, ws: args.ws });
@@ -142,63 +142,69 @@ const filterEvents = async (args: Args) => {
                 }
 
                 if ((ids && !ids.length) || (ids && ids.length && !isHex(ids[0]))) {
-                    sendError({ error: 'Missing req ids to filter events', id: subId, ws: args.ws });
+                    sendError({ error: 'Missing/Invalid "ids" in req, failed to filter events', id: subId, ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if ((authors && !authors.length) || (authors && authors.length && !isHex(authors[0]))) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid "authors" in req, failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if ((kinds && !kinds.length) || (kinds && kinds.length && !isNumber(kinds[0]))) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid "kinds" in req, failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if ((e && !e.length) || (e && e.length && !isHex(e[0]))) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid "#e" in req, failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if ((p && !p.length) || (p && p.length && !isHex(p[0]))) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid req "#p", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if (since || !isNumber(since)) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid req "since", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if (until || !isNumber(until)) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid req "until", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if (limit && !isNumber(limit)) {
-                    sendError({ error: 'Missing req authors to filter events', ws: args.ws });
+                    sendError({ error: 'Missing/Invalid req "limit", failed to filter events', ws: args.ws });
                     return cbk(new Error());
                 }
 
-                // TODO: filter events
+                const filteredGroups = data.groups.sort(
+                    (g1: any, g2: any) => g1.created_at >= g2.created_at ? -1 : 1
+                ).filter((g: any, i: number) =>
+                    filters.kinds.includes(g.kind) &&
+                    filters.ids.includes(g.id) &&
+                    filters.authors.includes(g.pubkey) &&
+                    g.created_at >= filters.since &&
+                    g.created_at <= filters.until &&
+                    i <= filters.limit
+                )
+                const filteredEvents = data.events.sort(
+                    (e1: any, e2: any) => e1.created_at >= e2.created_at ? -1 : 1
+                ).filter((e: any, i: number) =>
+                    filters.kinds.includes(e.kind) &&
+                    filters.ids.includes(e.id) &&
+                    filters.authors.includes(e.pubkey) &&
+                    e.created_at >= filters.since &&
+                    e.created_at <= filters.until &&
+                    i <= filters.limit
+                )
 
-                // const matchingEvents = data.events.find((e: any) => e.pubkey === authors[0] && e.kind === kinds[0] && e.tags[0][1]);
-                // const pTagId = req.tags[1].find((t: string) => isHex(t));
-                // const eTag = req.tags[0].find((t: string) => t === 'e');
-                // const eTagId = req.tags[0].find((t: string) => isHex(t));
+                // TODO: filter groups and events by #e / tag['e'], #p / tag['p'], 
 
-
-
-                // Check if a reference event exists for rsvp
-                // const findReferenecEvent = data.events.find((e: any) => e.id === eTagId);
-
-                // if (!findReferenecEvent) {
-                //     sendError({ error: 'Missing reference event to rsvp event', id: subId, ws: args.ws });
-                //     return cbk(new Error());
-                // }
-
-                return cbk(null, { events: [] });
+                return cbk(null, { events: [...filteredEvents, ...filteredGroups] });
 
             },
         ]

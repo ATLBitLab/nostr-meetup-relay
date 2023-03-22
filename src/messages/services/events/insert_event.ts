@@ -1,11 +1,11 @@
 import { readFile, writeFile, writeFileSync } from 'fs';
 
-import { InsertGroupType } from '../types';
+import { InsertEventType } from '../../../types';
 import WebSocket from 'ws';
 import { auto } from 'async';
-import { defaults } from '../constants';
-import sendError from './send_error';
-import sendOk from './send_ok';
+import { defaults } from '../../../constants';
+import sendError from '../../send_error';
+import sendOk from '../../send_ok';
 import { verifySchnorr } from 'tiny-secp256k1';
 
 const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
@@ -13,62 +13,67 @@ const { isArray } = Array;
 const isHex = (n: string) => !!n && !(n.length % 2) && /^[0-9A-F]*$/i.test(n);
 const stringify = (n: any) => JSON.stringify(n, null, 2);
 
-/** Inserts groups to a json file
- * @param {InsertGroupType} args.event
+/** Inserts events to a json file
+ * @param {InsertEventType} args.event
  * @param {WebSocket} args.ws
  *
  * @returns {Promise<void>}
  */
 type Args = {
-  group: InsertGroupType;
+  event: InsertEventType;
   ws: WebSocket;
 };
-const insertGroup = async (args: Args) => {
+const insertEvent = async (args: Args) => {
   return await auto({
     // Check arguments
     validate: cbk => {
-      const event = args.group[1];
+      const event = args.event[1];
+
+      if (!event.group_id) {
+        sendError({ error: 'Missing group id to insert event', ws: args.ws });
+        return cbk(new Error());
+      }
 
       if (!event.id || !isHex(event.id)) {
-        sendError({ error: 'Missing/invalid event id to insert group', ws: args.ws });
+        sendError({ error: 'Missing/invalid event id to insert event', ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.pubkey || !isHex(event.pubkey)) {
-        sendError({ error: 'Missing creator pubkey to insert group', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing creator pubkey to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.created_at || Date.parse(String(event.created_at))) {
-        sendError({ error: 'Missing/Invalid event created_at to insert group', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing/Invalid event created_at to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
-      if (!event.kind || event.kind !== defaults.event_kinds.group_insert) {
-        sendError({ error: 'Missing/invalid event kind to insert group', id: event.id, ws: args.ws });
+      if (!event.kind || event.kind !== defaults.event_kinds.insert) {
+        sendError({ error: 'Missing/invalid event kind to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.tags || !isArray(event.tags)) {
-        sendError({ error: 'Missing event tags to insert group', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event tags to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
-      // When inserting a new group, content cannot be empty
+      // When inserting a new event, content cannot be empty
       if (!event.content) {
-        sendError({ error: 'Missing event content to insert group', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event content to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       if (!event.sig) {
-        sendError({ error: 'Missing event sig to insert group', id: event.id, ws: args.ws });
+        sendError({ error: 'Missing event sig to insert event', id: event.id, ws: args.ws });
         return cbk(new Error());
       }
 
       // Verify the signature
       try {
         if (!verifySchnorr(hexAsBuffer(event.id), hexAsBuffer(event.pubkey), hexAsBuffer(event.sig))) {
-          sendError({ error: 'Invalid event sig to insert group', id: event.id, ws: args.ws });
+          sendError({ error: 'Invalid event sig to insert event', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
       } catch (error: any) {
@@ -82,18 +87,23 @@ const insertGroup = async (args: Args) => {
     // Read the data file
     readFile: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           if (!!err) {
-            sendError({ error: 'Invalid data file to insert group', ws: args.ws });
+            sendError({ error: 'Invalid data file to insert event', ws: args.ws });
             return cbk(new Error());
           }
 
           try {
             const data = JSON.parse(res);
 
+            if (!data.events || !isArray(data.events)) {
+              sendError({ error: 'Invalid data file', ws: args.ws });
+              return cbk(new Error());
+            }
+
             if (!data.groups || !isArray(data.groups)) {
-              sendError({ error: 'Invalid data file to insert groups', ws: args.ws });
+              sendError({ error: 'Invalid data file', ws: args.ws });
               return cbk(new Error());
             }
 
@@ -106,21 +116,27 @@ const insertGroup = async (args: Args) => {
       },
     ],
 
-    // Insert the group to the json file
-    insertGroup: [
+    // Insert the event to the json file
+    insertEvent: [
       'readFile',
       ({ readFile }, cbk) => {
-        const event = args.group[1];
+        const event = args.event[1];
         const data = readFile;
 
-        const checkDuplicate = data.groups.find((e: any) => e.id === event.id);
+        const checkDuplicate = data.events.find((e: any) => e.id === event.id);
+        const findGroup = data.groups.find((g: any) => g.id === event.group_id);
 
-        if (!!checkDuplicate) {
-          sendError({ error: 'Duplicate event id to insert group', id: event.id, ws: args.ws });
+        if (!findGroup) {
+          sendError({ error: 'Group not found', id: event.id, ws: args.ws });
           return cbk(new Error());
         }
 
-        data.groups.push(event);
+        if (!!checkDuplicate) {
+          sendError({ error: 'Duplicate event id', id: event.id, ws: args.ws });
+          return cbk(new Error());
+        }
+
+        data.events.push(event);
 
         writeFile(defaults.data_path, stringify(data), err => {
           if (!!err) {
@@ -128,7 +144,7 @@ const insertGroup = async (args: Args) => {
             return cbk(new Error());
           }
 
-          sendOk({ id: event.id, message: 'Group inserted', ws: args.ws });
+          sendOk({ id: event.id, message: 'Event inserted', ws: args.ws });
           return cbk();
         });
       },
@@ -136,4 +152,4 @@ const insertGroup = async (args: Args) => {
   });
 };
 
-export default insertGroup;
+export default insertEvent;

@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';
-import filterEvents from './filter_events';
+import filterEvents from '../messages/services/reqs/filter_events';
 import sendError from './send_error';
 import { Subscription } from '../types';
 
@@ -25,27 +25,37 @@ const manageRequests = async (args: Args) => {
         validate: cbk => {
             try {
                 const result = parse(args.req);
-                console.log(args)
+                console.log('result', result)
+                console.log('subs0', args.subs)
+
 
                 if (!isArray(result) || result.length < 3) {
+                    console.log('if1')
                     sendError({ error: 'Invalid req', ws: args.ws });
                     return cbk(new Error());
                 }
 
                 if (!defaults.message_types.includes(result[0])) {
+                    console.log('if2')
                     sendError({ error: 'Invalid req type', ws: args.ws });
                     return cbk(new Error());
                 }
 
-                const subscriptionId = result[1]
-                const active = args.subs.get(subscriptionId);
+                const subId = result[1]
+                console.log('subId', subId)
+                const active = args.subs.get(subId);
+                console.log('active', active)
                 const activeQuery: any = active?.query || '';
+                console.log('activeQuery', activeQuery)
                 const updated = activeQuery != '' && activeQuery !== result;
+                console.log('updated', updated)
                 if (!active || updated) {
+                    console.log('if3')
                     const sub = new Subscription(JSON.stringify(result), 0);
-                    args.subs.set(subscriptionId, sub);
+                    console.log('sub', sub)
+                    args.subs.set(subId, sub);
                 }
-                console.log(args)
+                console.log('subs1', args.subs)
 
                 return cbk();
             } catch (error: any) {
@@ -75,7 +85,7 @@ const manageRequests = async (args: Args) => {
                     ) {
                         return;
                     }
-                    console.log('subscriptionId', parseReq.req[1]);
+                    console.log('subId', parseReq.req[1]);
                     console.log('filters', parseReq.req[2]);
                     await filterEvents({ req: parseReq.req, ws: args.ws });
                     return;

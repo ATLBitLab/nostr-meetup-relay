@@ -1,11 +1,11 @@
 import { readFile, writeFile, writeFileSync } from 'fs';
 
-import { InsertEventType } from '../types';
+import { InsertEventType } from '../../../types';
 import WebSocket from 'ws';
 import { auto } from 'async';
-import { defaults } from '../constants';
-import sendError from './send_error';
-import sendOk from './send_ok';
+import { defaults } from '../../../constants';
+import sendError from '../../send_error';
+import sendOk from '../../send_ok';
 import { verifySchnorr } from 'tiny-secp256k1';
 
 const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
@@ -76,7 +76,7 @@ const rsvpEvent = async (args: Args) => {
     // Read the data file
     readFile: [
       'validate',
-      ({}, cbk) => {
+      ({ }, cbk) => {
         readFile(defaults.data_path, 'utf8', (err, res) => {
           if (!!err) {
             sendError({ error: err.message, ws: args.ws });

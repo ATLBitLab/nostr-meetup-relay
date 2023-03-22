@@ -1,12 +1,12 @@
 import WebSocket from 'ws';
 import { auto } from 'async';
-import { defaults } from '../constants';
-import editEvent from './edit_event';
-import editGroup from './edit_group';
-import insertEvent from './insert_event';
-import insertGroup from './insert_group';
-import rsvpEvent from './rsvp_event';
-import sendError from './send_error';
+import { defaults } from '../../constants';
+import editEvent from '../services/events/edit_event';
+import editGroup from '../services/events/edit_group';
+import insertEvent from '../services/events/insert_event';
+import insertGroup from '../services/events/insert_group';
+import rsvpEvent from '../services/events/rsvp_event';
+import sendError from '../send_error';
 
 const { parse } = JSON;
 const { isArray } = Array;

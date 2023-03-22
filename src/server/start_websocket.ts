@@ -2,7 +2,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 import { auto } from 'async';
 import { defaults } from '../constants';
-import { manageEvents, manageRequests } from '../events';
+import { manageEvents, manageRequests } from '../messages';
 
 const { parse } = JSON;
 const subs = new Map();

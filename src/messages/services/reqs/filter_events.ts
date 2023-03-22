@@ -2,9 +2,9 @@ import { readFile, writeFile, writeFileSync } from 'fs';
 
 import WebSocket from 'ws';
 import { auto } from 'async';
-import { defaults } from '../constants';
-import sendError from './send_error';
-import { ReqType } from '../types';
+import { defaults } from '../../../constants';
+import sendError from '../../send_error';
+import { ReqType } from '../../../types';
 
 const hexAsBuffer = (hex: string) => Buffer.from(hex, 'hex');
 const { isArray } = Array;
@@ -27,7 +27,7 @@ const filterEvents = async (args: Args) => {
         // Check arguments
         validate: cbk => {
             const req = args.req
-            const subscriptionId = req[1];
+            const subId = req[1];
             const reqFilters = req[2];
             const eventKinds = Object.values(defaults.event_kinds)
 
@@ -37,7 +37,7 @@ const filterEvents = async (args: Args) => {
             }
 
             if (reqFilters.authors && !isArray(reqFilters.authors)) {
-                sendError({ error: 'Invalid field authors used to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid field authors used to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
@@ -46,21 +46,21 @@ const filterEvents = async (args: Args) => {
                 (!isArray(reqFilters.kinds) ||
                     (reqFilters.kinds.filter((k: number) => !eventKinds.includes(k))).length > 0)
             ) {
-                sendError({ error: 'Invalid req kinds to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req kinds to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
             if (reqFilters['#e'] &&
                 (!isArray(reqFilters['#e']) || reqFilters['#e'].length === 0)
             ) {
-                sendError({ error: 'Invalid req #e to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req #e to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
             if (reqFilters['#p'] &&
                 (!isArray(reqFilters['#p']) || reqFilters['#p'].length === 0)
             ) {
-                sendError({ error: 'Invalid req #p to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req #p to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
@@ -70,7 +70,7 @@ const filterEvents = async (args: Args) => {
                     typeof reqFilters.since !== 'number'
                 )
             ) {
-                sendError({ error: 'Invalid req since to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req since to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
@@ -80,7 +80,7 @@ const filterEvents = async (args: Args) => {
                     typeof reqFilters.until !== 'number'
                 )
             ) {
-                sendError({ error: 'Invalid req until to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req until to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 
@@ -90,7 +90,7 @@ const filterEvents = async (args: Args) => {
                     typeof reqFilters.limit !== 'number'
                 )
             ) {
-                sendError({ error: 'Invalid req limit to filter events', id: subscriptionId, ws: args.ws });
+                sendError({ error: 'Invalid req limit to filter events', id: subId, ws: args.ws });
                 return cbk(new Error());
             }
 

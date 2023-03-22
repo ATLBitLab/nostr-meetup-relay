@@ -70,10 +70,7 @@ const manageRequests = async (args: Args) => {
           ) {
             return;
           }
-          console.log('subscriptionId', parseReq.req[1]);
-          console.log('filters', parseReq.req[2]);
-          await filterEvents({ req: parseReq.req, ws: args.ws });
-          return;
+          return await filterEvents({ req: parseReq.req, ws: args.ws });
         } catch (error: any) {
           return;
         }

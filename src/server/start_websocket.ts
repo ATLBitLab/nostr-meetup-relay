@@ -22,10 +22,9 @@ const startWebsocket = async () => {
         console.log('Client connected');
         ws.on('message', async (message: string) => {
           try {
-            console.log(parse(message)[0]);
             parse(message)[0] === 'EVENT'
               ? manageEvents({ event: message, ws })
-              : manageRequests({ req: message, ws, subs });
+              : cbk(null, { events: manageRequests({ req: message, ws, subs }) });
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

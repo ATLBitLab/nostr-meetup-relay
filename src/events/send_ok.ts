@@ -12,7 +12,7 @@ const messageType = 'OK';
  */
 type Args = {
   id: String;
-  message: String;
+  message: String | any;
   ws: WebSocket;
 };
 const sendOk = (args: Args) => {

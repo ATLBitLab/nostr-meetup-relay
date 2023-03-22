@@ -6,6 +6,7 @@ import { defaults } from '../constants';
 import sendError from './send_error';
 import { ReqType } from '../types';
 import { isHex, isNumber, isArray } from '../utils'
+import sendOk from './send_ok';
 
 /** Inserts events to a json file
  * @param {InsertEventType} args.event
@@ -59,17 +60,17 @@ const filterEvents = async (args: Args) => {
                 return cbk(new Error());
             }
 
-            if (reqFilters.since && !isNumber(reqFilters.since)) {
-                sendError({ error: 'Invalid req since to filter events', id: subscriptionId, ws: args.ws });
-                return cbk(new Error());
-            }
+            // if (!isNumber(reqFilters.since)) {
+            //     sendError({ error: 'Invalid req since to filter events', id: subscriptionId, ws: args.ws });
+            //     return cbk(new Error());
+            // }
 
-            if (reqFilters.until && !isNumber(reqFilters.until)) {
+            if (!isNumber(reqFilters.until)) {
                 sendError({ error: 'Invalid req until to filter events', id: subscriptionId, ws: args.ws });
                 return cbk(new Error());
             }
 
-            if (reqFilters.limit && !isNumber(reqFilters.limit)) {
+            if (!isNumber(reqFilters.limit)) {
                 sendError({ error: 'Invalid req limit to filter events', id: subscriptionId, ws: args.ws });
                 return cbk(new Error());
             }
@@ -146,13 +147,13 @@ const filterEvents = async (args: Args) => {
                     return cbk(new Error());
                 }
 
-                console.log('since', since)
-                console.log('!isNumber(since)', !isNumber(since))
-                console.log('isNumber(since)', isNumber(since))
-                if (!isNumber(since)) {
-                    sendError({ error: 'Missing/Invalid req "since", failed to filter events', ws: args.ws });
-                    return cbk(new Error());
-                }
+                // console.log('since', since)
+                // console.log('!isNumber(since)', !isNumber(since))
+                // console.log('isNumber(since)', isNumber(since))
+                // if (!isNumber(since)) {
+                //     sendError({ error: 'Missing/Invalid req "since", failed to filter events', ws: args.ws });
+                //     return cbk(new Error());
+                // }
 
                 if (!isNumber(until)) {
                     sendError({ error: 'Missing/Invalid req "until", failed to filter events', ws: args.ws });
@@ -164,7 +165,7 @@ const filterEvents = async (args: Args) => {
                     return cbk(new Error());
                 }
 
-                const filteredGroups = data.groups.sort(
+                const groups = data.groups.sort(
                     (g1: any, g2: any) => g1.created_at >= g2.created_at ? -1 : 1
                 ).filter((g: any, i: number) =>
                     filters.kinds.includes(g.kind) &&
@@ -174,7 +175,7 @@ const filterEvents = async (args: Args) => {
                     g.created_at <= filters.until &&
                     i <= filters.limit
                 )
-                const filteredEvents = data.events.sort(
+                const meetings = data.events.sort(
                     (e1: any, e2: any) => e1.created_at >= e2.created_at ? -1 : 1
                 ).filter((e: any, i: number) =>
                     filters.kinds.includes(e.kind) &&
@@ -184,11 +185,11 @@ const filterEvents = async (args: Args) => {
                     e.created_at <= filters.until &&
                     i <= filters.limit
                 )
-
                 // TODO: filter groups and events by #e / tag['e'], #p / tag['p'], 
-
-                return cbk(null, { events: [...filteredEvents, ...filteredGroups] });
-
+                let message: any = [...meetings, ...groups]
+                if (!groups.length && !meetings.length) message = 'No meetings or groups found!'
+                sendOk({ id: subId, message: message, ws: args.ws })
+                return cbk();
             },
         ]
     });

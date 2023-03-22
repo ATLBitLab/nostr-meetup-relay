@@ -1,9 +1,9 @@
 import WebSocket from 'ws';
 import { auto } from 'async';
-import { defaults } from '../constants';
-import filterEvents from '../messages/services/reqs/filter_events';
-import sendError from './send_error';
-import { Subscription } from '../types';
+import { defaults } from '../../constants';
+import filterEvents from '../services/reqs/filter_events';
+import sendError from '../send_error';
+import { Subscription } from '../../types';
 
 const { parse } = JSON;
 const { isArray } = Array;
@@ -19,7 +19,7 @@ type Args = {
     ws: WebSocket;
     subs: Map<string, Subscription>;
 };
-const manageRequests = async (args: Args) => {
+const handleReqs = async (args: Args) => {
     return await auto({
         // Check arguments
         validate: cbk => {
@@ -100,4 +100,4 @@ const manageRequests = async (args: Args) => {
     });
 };
 
-export default manageRequests;
+export default handleReqs;

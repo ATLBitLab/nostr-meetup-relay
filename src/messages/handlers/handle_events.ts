@@ -21,7 +21,7 @@ type Args = {
   event: string;
   ws: WebSocket;
 };
-const manageEvents = async (args: Args) => {
+const handleEvents = async (args: Args) => {
   return await auto({
     // Check arguments
     validate: cbk => {
@@ -165,4 +165,4 @@ const manageEvents = async (args: Args) => {
   });
 };
 
-export default manageEvents;
+export default handleEvents;

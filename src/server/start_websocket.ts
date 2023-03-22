@@ -2,7 +2,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 
 import { auto } from 'async';
 import { defaults } from '../constants';
-import { manageEvents, manageReqs } from '../messages';
+import { handleEvents, handleReqs } from '../messages';
 
 const { parse } = JSON;
 const subs = new Map();
@@ -22,7 +22,7 @@ const startWebsocket = async () => {
         console.log('Client connected');
         ws.on('message', async (message: string) => {
           try {
-            parse(message)[0] === 'EVENT' ? manageEvents({ event: message, ws }) : manageReqs({ req: message, ws, subs })
+            parse(message)[0] === 'EVENT' ? handleEvents({ event: message, ws }) : handleReqs({ req: message, ws, subs })
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

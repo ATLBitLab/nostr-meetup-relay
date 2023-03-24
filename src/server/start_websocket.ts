@@ -24,7 +24,7 @@ const startWebsocket = async () => {
           try {
             parse(message)[0] === 'EVENT'
               ? manageEvents({ event: message, ws })
-              : cbk(null, { events: manageRequests({ req: message, ws, subs }) });
+              : manageRequests({ req: message, ws, subs });
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

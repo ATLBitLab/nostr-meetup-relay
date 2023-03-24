@@ -22,8 +22,8 @@ const manageRequests = async (args: Args) => {
     // Check arguments
     validate: cbk => {
       try {
+        console.log('validate')
         const result = parse(args.req);
-
         if (!isArray(result) || result.length < 3) {
           sendError({ error: 'Invalid req', ws: args.ws });
           return cbk(new Error());
@@ -53,6 +53,7 @@ const manageRequests = async (args: Args) => {
     parseReq: [
       'validate',
       ({ }, cbk) => {
+        console.log('parseReq')
         return cbk(null, { req: parse(args.req) });
       },
     ],
@@ -61,6 +62,8 @@ const manageRequests = async (args: Args) => {
       'parseReq',
       async ({ parseReq }: any) => {
         // Exit early when not inserting a group
+        console.log('filterEvents')
+
         try {
           if (
             parseReq.req[0] !== defaults.req_event_type ||
@@ -70,7 +73,8 @@ const manageRequests = async (args: Args) => {
           ) {
             return;
           }
-          return await filterEvents({ req: parseReq.req, ws: args.ws });
+          const response = await filterEvents({ req: parseReq.req, ws: args.ws });
+          return response;
         } catch (error: any) {
           return;
         }

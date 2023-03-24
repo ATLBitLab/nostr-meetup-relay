@@ -29,92 +29,180 @@ const filterEvents = async (args: Args) => {
             const e = filters["#e"], p = filters["#p"];
             const eventKinds = Object.values(defaults.event_kinds);
 
-            const nonHexIDs = authors.filter((a: string) => !isHex(a)).length > 0
-            if (
-                (ids && !ids.length) ||
-                (ids && ids.length && (!isArray(ids) || nonHexIDs))
-            ) {
-                sendError({
-                    error: "Invalid req ids to filter and subscribe",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (ids) {
+                if (!isArray(ids)) {
+                    sendError({
+                        error: "Invalid req: ids must be array",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+
+                if (ids.length === 0) {
+                    sendError({
+                        error: "Invalid req: ids array cannot be length 0",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+
+                const nonHexIDs = ids.filter((a) => !isHex(a)).length > 0
+                if (nonHexIDs) {
+                    sendError({
+                        error: "Invalid req: ids array must contain hex strings",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            const nonHexAuthors = authors.filter((a: string) => !isHex(a)).length > 0
-            if (
-                (authors && !authors.length) ||
-                (authors && authors.length && (!isArray(authors) || nonHexAuthors))
-            ) {
-                sendError({
-                    error: "Invalid field authors used to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (authors) {
+                if (!isArray(authors)) {
+                    sendError({
+                        error: "Invalid req: authors must be array",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+
+                }
+
+                if (authors.length === 0) {
+                    sendError({
+                        error: "Invalid req: authors array cannot be length 0",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+
+                const nonHexAuthors = authors.filter((a: string) => !isHex(a)).length > 0
+                if (nonHexAuthors) {
+                    sendError({
+                        error: "Invalid req filter: authors array must contain hex strings",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            const invalidKinds = kinds.filter((k: number) => !eventKinds.includes(k)).length > 0
-            if (
-                (kinds && !kinds.length) ||
-                (!isArray(kinds) && invalidKinds)
-            ) {
-                sendError({
-                    error: "Invalid req kinds to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (kinds) {
+                if (!isArray(kinds)) {
+                    sendError({
+                        error: "Invalid req: kinds must be array",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+                if (kinds.length === 0) {
+                    sendError({
+                        error: "Invalid req: kinds array cannot be length 0",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+                const invalidKinds = kinds.filter((k: number) => !eventKinds.includes(k)).length > 0
+                if (invalidKinds) {
+                    sendError({
+                        error: "Invalid req filter: kinds array must contain hex strings",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            const nonHexEs = e.filter((t: string) => !isHex(t)).length > 0
-            if (
-                (e && !e.length) ||
-                (e && e.length && (!isArray(e) || nonHexEs))
-            ) {
-                sendError({
-                    error: "Invalid req #e to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (e) {
+                if (!isArray(e)) {
+                    sendError({
+                        error: "Invalid req: e must be array",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+
+                }
+                if (e.length === 0) {
+                    sendError({
+                        error: "Invalid req: e array cannot be length 0",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+                const nonHexEs = e.filter((t: string) => !isHex(t)).length > 0
+                if (nonHexEs) {
+                    sendError({
+                        error: "Invalid req filter: e array must contain hex strings",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            const nonHexPs = p.filter((t: string) => !isHex(t)).length > 0
-            if (
-                (p && !p.length) ||
-                (p && p.length && (!isArray(p) || nonHexPs))
-            ) {
-                sendError({
-                    error: "Invalid req #p to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (p) {
+                if (!isArray(p)) {
+                    sendError({
+                        error: "Invalid req: p must be array",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+
+                }
+                if (p.length === 0) {
+                    sendError({
+                        error: "Invalid req: p array cannot be length 0",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
+                const nonHexPs = p.filter((t: string) => !isHex(t)).length > 0
+                if (nonHexPs) {
+                    sendError({
+                        error: "Invalid req filter: p array must contain hex strings",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            if (since && !isNumber(since)) {
-                sendError({ error: 'Invalid req since to filter events', id: subId, ws: args.ws });
-                return cbk(new Error());
+            if (since) {
+                if (!isNumber(since)) {
+                    sendError({ error: 'Invalid req filter: since must be a number', id: subId, ws: args.ws });
+                    return cbk(new Error());
+                }
             }
 
-            if (until && !isNumber(until)) {
-                sendError({
-                    error: "Invalid req until to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (until) {
+                if (!isNumber(until)) {
+                    sendError({
+                        error: "Invalid req filter: until must be a number",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
-            if (limit && !isNumber(limit)) {
-                sendError({
-                    error: "Invalid req limit to filter events",
-                    id: subId,
-                    ws: args.ws
-                });
-                return cbk(new Error());
+            if (limit) {
+                if (!isNumber(limit)) {
+                    sendError({
+                        error: "Invalid req filter: limit must be a number",
+                        id: subId,
+                        ws: args.ws
+                    });
+                    return cbk(new Error());
+                }
             }
 
             return cbk();
@@ -181,6 +269,7 @@ const filterEvents = async (args: Args) => {
                 if (since) usableFilters['since'] = since
                 if (until) usableFilters['until'] = until
                 if (limit) usableFilters['limit'] = limit
+
 
                 // TODO: filter groups and events by #e / tag['e'], #p / tag['p'],
 

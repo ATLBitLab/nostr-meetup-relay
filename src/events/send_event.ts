@@ -13,11 +13,11 @@ const messageType = 'EVENT';
  */
 type Args = {
   id: String;
-  message: String | any;
+  message: String;
   ws: WebSocket;
 };
 const sendOk = (args: Args) => {
-  const message = [messageType, args.id || '', true, args.message];
+  const message = [messageType, args.id || '', args.message];
   console.log('Success =>', args.message);
 
   args.ws.send(stringify(message));

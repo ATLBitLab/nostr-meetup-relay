@@ -8,7 +8,7 @@ const hashEvent = n =>
 const pubkey =
   "55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57";
 const createdAt = Math.round(Date.now() / 1000);
-const kind = 700; // change this based on event type (600, 601, 700, 701, 702)
+const kind = 702; // change this based on event type (600, 601, 700, 701, 702)
 const tags = [
   ["e", "283fa620ebbd5ba3104243c88358f3f8cfe817bb95c7afcd6419c507dd592108"],
   ["p", "55a3fd367611e5161719388e9ca8d0eea5fea62374340bf98c85c3c0fcd42a57"]
@@ -22,9 +22,9 @@ const sampleJson = {
   pubkey,
   tags,
   created_at: createdAt,
-  id: "012", // change this at random
-  group_id: "123", // change this to something random if creating new group or to a specific group_id if creating a new meetup for a specific group
-  sig: "012" // change this at random
+  id: "00000", // change this at random
+  group_id: "00000", // change this to something random if creating new group or to a specific group_id if creating a new meetup for a specific group
+  sig: "00000" // change this at random
 };
 
 const event = ["EVENT", sampleJson];

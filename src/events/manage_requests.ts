@@ -61,9 +61,6 @@ const manageRequests = async (args: Args) => {
     filterEvents: [
       'parseReq',
       async ({ parseReq }: any) => {
-        // Exit early when not inserting a group
-        console.log('filterEvents')
-
         try {
           if (
             parseReq.req[0] !== defaults.req_event_type ||
@@ -73,8 +70,8 @@ const manageRequests = async (args: Args) => {
           ) {
             return;
           }
-          const response = await filterEvents({ req: parseReq.req, ws: args.ws });
-          return response;
+          await filterEvents({ req: parseReq.req, ws: args.ws });
+          return;
         } catch (error: any) {
           return;
         }

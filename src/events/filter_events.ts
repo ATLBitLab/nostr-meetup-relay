@@ -286,7 +286,11 @@ const filterEvents = async (args: Args) => {
                 let selection: any = [...groups, ...meetings];
                 if (isNumber(limit)) selection = selection.splice(0, limit);
                 if (!selection.length) selection = 'No groups or meetings found!';
-                sendEvent({ id: subId, message: selection, ws: args.ws });
+                console.log(selection)
+                for (let e of selection) {
+                    console.log(e)
+                    sendEvent({ id: subId, message: e, ws: args.ws })
+                };
                 return cbk();
             },
         ],

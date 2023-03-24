@@ -10,6 +10,7 @@ export const defaults = {
   event_kinds: {
     group_insert: 600,
     group_edit: 601,
+    group_join: 602,
     insert: 700,
     edit: 701,
     rsvp: 702,

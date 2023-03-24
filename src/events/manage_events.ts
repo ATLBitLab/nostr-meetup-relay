@@ -5,6 +5,7 @@ import editEvent from './edit_event';
 import editGroup from './edit_group';
 import insertEvent from './insert_event';
 import insertGroup from './insert_group';
+import joinGroup from './join_group';
 import rsvpEvent from './rsvp_event';
 import sendError from './send_error';
 import { isArray, parse } from '../utils'
@@ -91,6 +92,27 @@ const manageEvents = async (args: Args) => {
           }
 
           await editGroup({ group: parseEvent.event, ws: args.ws });
+          return;
+        } catch (error: any) {
+          return;
+        }
+      },
+    ],
+
+    // Edit the group
+    joinGroup: [
+      'parseEvent',
+      async ({ parseEvent }) => {
+        // Exit early when not editing a group
+        try {
+          if (
+            parseEvent.event[0] !== defaults.publish_event_type ||
+            parseEvent.event[1].kind !== defaults.event_kinds.group_join
+          ) {
+            return;
+          }
+
+          await joinGroup({ group: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
           return;

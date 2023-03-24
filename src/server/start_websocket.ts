@@ -4,7 +4,7 @@ import { manageEvents, manageRequests } from '../events';
 import { auto } from 'async';
 import { defaults } from '../constants';
 
-import { parse } from '../utils'
+import { parse } from '../utils';
 
 const subs = new Map();
 /** Start websocket server
@@ -23,8 +23,8 @@ const startWebsocket = async () => {
         ws.on('message', async (message: string) => {
           try {
             parse(message)[0] === 'EVENT'
-              ? manageEvents({ event: message, ws })
-              : manageRequests({ req: message, ws, subs });
+              ? await manageEvents({ event: message, ws })
+              : await manageRequests({ req: message, ws, subs });
           } catch (error: any) {
             console.error(`Error => ${error.message}`);
           }

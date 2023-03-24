@@ -6,7 +6,7 @@ import { auto } from 'async';
 import { defaults } from '../constants';
 import sendError from './send_error';
 import { ReqType } from '../types';
-import { isHex, isNumber, isArray } from '../utils';
+import { isHex, isNumber, stringify, isArray } from '../utils'
 import sendEvent from './send_event';
 
 /** Inserts events to a json file
@@ -280,23 +280,22 @@ const filterEvents = async (args: Args) => {
                     if (usableFilters.since) meetings = meetings.filter((g: any) => g.created_at >= usableFilters.since);
                     if (usableFilters.until) meetings = meetings.filter((g: any) => g.created_at <= usableFilters.until);
                 }
-
                 let events: any = [...groups, ...meetings];
                 if (isNumber(limit)) events = events.splice(0, limit);
-
                 const active: any = args.subs.get(subId)
-                events = events.filter((e: any) => e.created_at > active?.lastEvent || 0) || [];
+                events = events.filter((e: any) => e.created_at > active?.lastEvent || 0);
                 const lastEvent = events[events.length - 1];
                 if (lastEvent) {
                     active.lastEvent = lastEvent.created_at;
                     args.subs.set(subId, active);
                 }
-                for (let event of events) {
-                    if (event) {
-                        console.log(`[SENT]: ${JSON.stringify(['EVENT', subId, event])}`);
-                        sendEvent({ id: subId, message: event, ws: args.ws })
+                writeFile(defaults.subs_path, stringify(Object.fromEntries(args.subs)), 'utf8', err => {
+                    if (!!err) {
+                        sendError({ error: err.message, id: subId, ws: args.ws });
+                        return cbk(new Error());
                     }
-                }
+                });
+                for (let event of events) if (event) sendEvent({ id: subId, message: event, ws: args.ws })
                 return cbk();
             },
         ],

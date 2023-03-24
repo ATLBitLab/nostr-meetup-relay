@@ -169,5 +169,6 @@ dist
 .pnp.\*
 
 # Build
-build/
+build
 meetup.json
+subscriptions.json

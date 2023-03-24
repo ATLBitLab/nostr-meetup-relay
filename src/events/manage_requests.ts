@@ -22,25 +22,23 @@ const manageRequests = async (args: Args) => {
     // Check arguments
     validate: cbk => {
       try {
-        const result = parse(args.req);
-        if (!isArray(result) || result.length < 3) {
+        const req = parse(args.req);
+        if (!isArray(req) || req.length < 3) {
           sendError({ error: 'Invalid req', ws: args.ws });
           return cbk(new Error());
         }
-
-        if (!defaults.message_types.includes(result[0])) {
+        if (!defaults.message_types.includes(req[0])) {
           sendError({ error: 'Invalid req type', ws: args.ws });
           return cbk(new Error());
         }
-        const subscriptionId = result[1];
+        const subscriptionId = req[1];
         const active = args.subs.get(subscriptionId);
         const activeQuery: any = active?.query || '';
-        const updated = activeQuery != '' && activeQuery !== result;
+        const updated = activeQuery != '' && activeQuery !== req;
         if (!active || updated) {
-          const sub = new Subscription(JSON.stringify(result), 0);
+          const sub = new Subscription(JSON.stringify(req), 0);
           args.subs.set(subscriptionId, sub);
         }
-
         return cbk();
       } catch (error: any) {
         sendError({ error: error.message, ws: args.ws });

@@ -1,3 +1,5 @@
+import { isArray, parse } from '../utils';
+
 import WebSocket from 'ws';
 import { auto } from 'async';
 import { defaults } from '../constants';
@@ -8,7 +10,6 @@ import insertGroup from './insert_group';
 import joinGroup from './join_group';
 import rsvpEvent from './rsvp_event';
 import sendError from './send_error';
-import { isArray, parse } from '../utils'
 
 /** Manage events
  * @param {string} args.event
@@ -52,7 +53,7 @@ const manageEvents = async (args: Args) => {
     // Return the parsed event
     parseEvent: [
       'validate',
-      ({ }, cbk) => {
+      ({}, cbk) => {
         return cbk(null, { event: parse(args.event) });
       },
     ],
@@ -112,7 +113,7 @@ const manageEvents = async (args: Args) => {
             return;
           }
 
-          await joinGroup({ group: parseEvent.event, ws: args.ws });
+          await joinGroup({ event: parseEvent.event, ws: args.ws });
           return;
         } catch (error: any) {
           return;

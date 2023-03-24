@@ -6,7 +6,7 @@ import { defaults } from '../constants';
 import sendError from './send_error';
 import { ReqType } from '../types';
 import { isHex, isNumber, isArray } from '../utils';
-import sendOk from './send_ok';
+import sendEvent from './send_event';
 
 /** Inserts events to a json file
  * @param {InsertEventType} args.event
@@ -264,7 +264,11 @@ const filterEvents = async (args: Args) => {
                     if (usableFilters.kinds) groups = groups.filter((g: any) => usableFilters.kinds.includes(g.kind));
                     if (usableFilters.ids) groups = groups.filter((g: any) => usableFilters.ids.includes(g.id));
                     if (usableFilters.authors) groups = groups.filter((g: any) => usableFilters.authors.includes(g.pubkey));
-                    // if (usableFilters.e) groups = groups.filter((g: any) => g)
+                    console.log('groups before e', groups)
+                    if (usableFilters.e) groups = groups.filter((g: any) => usableFilters.e.filter((e: any) => g.tags[0][0] === 'e' && g.tags[0][1] === e))
+                    console.log('groups after e and before p', groups)
+                    if (usableFilters.p) groups.filter((g: any) => usableFilters.p.filter((p: any) => g.tags[0][0] === 'p' && g.tags[0][1] === p))
+                    console.log('groups after p', groups)
                     if (usableFilters.since) groups = groups.filter((g: any) => g.created_at >= usableFilters.since);
                     if (usableFilters.until) groups = groups.filter((g: any) => g.created_at <= usableFilters.until);
                 }
@@ -282,7 +286,7 @@ const filterEvents = async (args: Args) => {
                 let selection: any = [...groups, ...meetings];
                 if (isNumber(limit)) selection = selection.splice(0, limit);
                 if (!selection.length) selection = 'No groups or meetings found!';
-                sendOk({ id: subId, message: selection, ws: args.ws });
+                sendEvent({ id: subId, message: selection, ws: args.ws });
                 return cbk();
             },
         ],

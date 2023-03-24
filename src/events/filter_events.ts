@@ -1,4 +1,4 @@
-import { readFile, writeFile, writeFileSync } from 'fs';
+import { readFile, writeFile } from 'fs';
 import { Subscription } from '../types';
 
 import WebSocket from 'ws';
@@ -8,6 +8,7 @@ import sendError from './send_error';
 import { ReqType } from '../types';
 import { isHex, isNumber, stringify, isArray } from '../utils'
 import sendEvent from './send_event';
+import sendEose from './send_eose';
 
 /** Inserts events to a json file
  * @param {InsertEventType} args.event
@@ -296,6 +297,7 @@ const filterEvents = async (args: Args) => {
                     }
                 });
                 for (let event of events) if (event) sendEvent({ id: subId, message: event, ws: args.ws })
+                sendEose({ id: subId, ws: args.ws })
                 return cbk();
             },
         ],

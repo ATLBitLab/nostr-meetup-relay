@@ -1,4 +1,5 @@
 import { readFile, writeFile, writeFileSync } from 'fs';
+import { Subscription } from '../types';
 
 import WebSocket from 'ws';
 import { auto } from 'async';
@@ -17,6 +18,7 @@ import sendEvent from './send_event';
 type Args = {
     req: ReqType;
     ws: WebSocket;
+    subs: Map<string, Subscription>;
 };
 const filterEvents = async (args: Args) => {
     return await auto({
@@ -246,7 +248,6 @@ const filterEvents = async (args: Args) => {
                     e = filters['#e'],
                     p = filters['#p'];
                 const usableFilters: any = {};
-
                 if (ids && ids.length) usableFilters['ids'] = ids;
                 if (authors && authors.length) usableFilters['authors'] = authors;
                 if (kinds && kinds.length) usableFilters['kinds'] = kinds;
@@ -255,8 +256,6 @@ const filterEvents = async (args: Args) => {
                 if (since) usableFilters['since'] = since;
                 if (until) usableFilters['until'] = until;
                 if (limit) usableFilters['limit'] = limit;
-
-                // TODO: filter groups and events by #e / tag['e'], #p / tag['p'],
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GROUPS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 let groups: any = [];
                 if (data.groups) {
@@ -264,11 +263,8 @@ const filterEvents = async (args: Args) => {
                     if (usableFilters.kinds) groups = groups.filter((g: any) => usableFilters.kinds.includes(g.kind));
                     if (usableFilters.ids) groups = groups.filter((g: any) => usableFilters.ids.includes(g.id));
                     if (usableFilters.authors) groups = groups.filter((g: any) => usableFilters.authors.includes(g.pubkey));
-                    console.log('groups before e', groups)
                     if (usableFilters.e) groups = groups.filter((g: any) => usableFilters.e.filter((e: any) => g.tags[0][0] === 'e' && g.tags[0][1] === e))
-                    console.log('groups after e and before p', groups)
                     if (usableFilters.p) groups.filter((g: any) => usableFilters.p.filter((p: any) => g.tags[0][0] === 'p' && g.tags[0][1] === p))
-                    console.log('groups after p', groups)
                     if (usableFilters.since) groups = groups.filter((g: any) => g.created_at >= usableFilters.since);
                     if (usableFilters.until) groups = groups.filter((g: any) => g.created_at <= usableFilters.until);
                 }
@@ -279,18 +275,28 @@ const filterEvents = async (args: Args) => {
                     if (usableFilters.kinds) meetings = meetings.filter((g: any) => usableFilters.kinds.includes(g.kind));
                     if (usableFilters.ids) meetings = meetings.filter((g: any) => usableFilters.ids.includes(g.id));
                     if (usableFilters.authors) meetings = meetings.filter((g: any) => usableFilters.authors.includes(g.pubkey));
+                    if (usableFilters.e) meetings = meetings.filter((m: any) => usableFilters.e.filter((e: any) => m.tags[0][0] === 'e' && m.tags[0][1] === e))
+                    if (usableFilters.p) meetings.filter((m: any) => usableFilters.p.filter((p: any) => m.tags[0][0] === 'p' && m.tags[0][1] === p))
                     if (usableFilters.since) meetings = meetings.filter((g: any) => g.created_at >= usableFilters.since);
                     if (usableFilters.until) meetings = meetings.filter((g: any) => g.created_at <= usableFilters.until);
                 }
 
-                let selection: any = [...groups, ...meetings];
-                if (isNumber(limit)) selection = selection.splice(0, limit);
-                if (!selection.length) selection = 'No groups or meetings found!';
-                console.log(selection)
-                for (let e of selection) {
-                    console.log(e)
-                    sendEvent({ id: subId, message: e, ws: args.ws })
-                };
+                let events: any = [...groups, ...meetings];
+                if (isNumber(limit)) events = events.splice(0, limit);
+
+                const active: any = args.subs.get(subId)
+                events = events.filter((e: any) => e.created_at > active?.lastEvent || 0) || [];
+                const lastEvent = events[events.length - 1];
+                if (lastEvent) {
+                    active.lastEvent = lastEvent.created_at;
+                    args.subs.set(subId, active);
+                }
+                for (let event of events) {
+                    if (event) {
+                        console.log(`[SENT]: ${JSON.stringify(['EVENT', subId, event])}`);
+                        sendEvent({ id: subId, message: event, ws: args.ws })
+                    }
+                }
                 return cbk();
             },
         ],

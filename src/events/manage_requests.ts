@@ -22,7 +22,6 @@ const manageRequests = async (args: Args) => {
     // Check arguments
     validate: cbk => {
       try {
-        console.log('validate')
         const result = parse(args.req);
         if (!isArray(result) || result.length < 3) {
           sendError({ error: 'Invalid req', ws: args.ws });
@@ -53,7 +52,6 @@ const manageRequests = async (args: Args) => {
     parseReq: [
       'validate',
       ({ }, cbk) => {
-        console.log('parseReq')
         return cbk(null, { req: parse(args.req) });
       },
     ],
@@ -70,7 +68,7 @@ const manageRequests = async (args: Args) => {
           ) {
             return;
           }
-          await filterEvents({ req: parseReq.req, ws: args.ws });
+          await filterEvents({ req: parseReq.req, ws: args.ws, subs: args.subs });
           return;
         } catch (error: any) {
           return;

@@ -1,7 +1,5 @@
 import WebSocket from 'ws';
-
 import { stringify } from '../utils'
-import { parse } from 'path';
 const messageType = 'EVENT';
 
 /** Send an OK message to the client

@@ -1,4 +1,4 @@
-import { readFile, writeFile, writeFileSync } from 'fs';
+import { readFile, writeFile } from 'fs';
 
 import { InsertEventType } from '../types';
 import WebSocket from 'ws';

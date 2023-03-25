@@ -1,7 +1,5 @@
 import WebSocket from 'ws';
-
 import { stringify } from '../utils'
-import { parse } from 'path';
 const messageType = 'OK';
 
 /** Send an OK message to the client
@@ -17,7 +15,7 @@ type Args = {
   ws: WebSocket;
 };
 const sendOk = (args: Args) => {
-  const message = [messageType, args.id || '', true, args.message];
+  const message = [messageType, args.id || '', args.message];
   console.log('Success =>', args.message);
 
   args.ws.send(stringify(message));

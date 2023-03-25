@@ -16,7 +16,7 @@ type Args = {
   ws: WebSocket;
 };
 const sendError = (args: Args) => {
-  const message = [messageType, args.id || '', false, `[ERROR]: ${args.error}`];
+  const message = [messageType, args.id || '', `[ERROR]: ${args.error}`];
   console.error(`Error => ${args.error}`);
 
   args.ws.send(stringify(message));
